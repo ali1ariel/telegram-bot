@@ -37,6 +37,9 @@ def lastFMbo (username)
   controlador = 0
   b = Hash.new
   a = user.recent_tracks["track"][0]
+  if(a.class == NilClass)
+    return false
+  end  
   b['isListening'] = a.include? '@attr'
   b['name'] = a['name']
   b['artist'] = a['artist']['#text']
