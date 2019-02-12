@@ -34,6 +34,9 @@ def lastFMbo (username)
 
     
   user = Scrobbler2::User.new(username)
+  if (user.recent_tracks.class == NilClass) 
+    return false
+  end
   controlador = 0
   b = Hash.new
   a = user.recent_tracks["track"][0]
