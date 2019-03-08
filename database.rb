@@ -31,3 +31,6 @@ def retornaUser(client, userid)
         return what["User_NickName"]
     end
 end
+
+
+#insert into Users(User_ID, User_NickName) values ('649463249', 'Cherrry-')
