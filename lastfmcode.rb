@@ -1,16 +1,16 @@
 require 'scrobbler2'
 
 def datasong(song, texto)
-  return texto = "#{texto}\n \u{1F3B6} #{song['name']}\n \u{1F465} #{song['artist']}\n \u{1F4BF} #{song['album']}"
+  return texto = "#{texto}\n \u{1F3B6} <b>#{song['name']}</b>\n \u{1F465} <i>#{song['artist']}</i>\n \u{1F4BF} <i>#{song['album']}</i>"
 end
   
 def listening(song)
-  texto ="is listening for the #{playcount(song)} \u{2716}time to:"
+  texto ="<i>is listening for the</i><b> #{playcount(song)}</b> \u{2716}<b>time</b> <i>to:</i>"
   datasong(song, texto)
 end
 
 def waslistening(song)
-  texto ="was listening for the #{playcount(song)} \u{2716}time to:"
+  texto ="<i>was listening for the</i> <b>#{playcount(song)}</b> \u{2716}<b>time</b> <i>to:</i>"
   datasong(song, texto)
 end
 
@@ -42,24 +42,47 @@ def getTrackInfo (username)
 
 end
 
-def getTrack(username)
+def getListen(trackInfo, newInfo)
+  if(!trackInfo['image'][3]['#text'].to_s.empty?)
+    newInfo['image']['link'] = trackInfo['image'][3]['#text']
+    newInfo['image']['size'] = trackInfo['image'][3]['size']
+  end
+end
+
+def getMiniListen(trackInfo, newInfo)
+  if(!trackInfo['image'][2]['#text'].to_s.empty?)
+    newInfo['image']['link'] = trackInfo['image'][2]['#text']
+    newInfo['image']['size'] = trackInfo['image'][2]['size']
+  end
+end
+
+
+
+def getTrack(username, typeListen)
   newInfo = Hash.new
   trackInfo = getTrackInfo(username)
+  if trackInfo ==false
+    return false
+  end
   newInfo['isListening'] = trackInfo.include? '@attr'
   newInfo['name'] = trackInfo['name']
   newInfo['artist'] = trackInfo['artist']['#text']
   track = Scrobbler2::Track.new(newInfo['artist'], newInfo['name'], username)
   if(track.info.class != NilClass)  
     newInfo['playcount'] = track.info['userplaycount'].to_i  
-    if track.info['userplaycount'] == '0'
-       newInfo['playcount'] += 1
+    puts "=> #{newInfo['playcount']} e #{newInfo['playcount'].class}"
+    if newInfo['playcount'] == 0
+
+       newInfo['playcount'] =+1
     end
   end
   newInfo['album'] = trackInfo['album']['#text']
   newInfo['image'] = Hash.new
-  if(!trackInfo['image'][3]['#text'].to_s.empty?)
-    newInfo['image']['link'] = trackInfo['image'][3]['#text']
-    newInfo['image']['size'] = trackInfo['image'][3]['size']
+  case typeListen
+  when 1
+    getListen(trackInfo, newInfo)
+  when 2
+    getMiniListen(trackInfo, newInfo)
   end
   return newInfo
 end
@@ -87,7 +110,8 @@ def getAlbum(username)
   artist = trackInfo['artist']['#text']
   album = trackInfo['album']['#text']
   puts album.class
-  newInfo['name'] = album
+  newInfo['album'] = album
+  newInfo['artist'] = artist
   album = Scrobbler2::Album.new(artist, album, username)
   album = album.info
   print "\n"
@@ -102,5 +126,3 @@ def getAlbum(username)
   end
   return newInfo
 end
-
-  

@@ -8,7 +8,7 @@ def iniciaServidor()
 end
 
 def incluiUser(client, username, userid)
-    if(lastFMbo(username) == false)
+    if(getTrackInfo(username) == false)
         return 'Usuário não existe'
     end
     queryteste = "select * from Users where User_ID = #{userid}"
@@ -31,6 +31,3 @@ def retornaUser(client, userid)
         return what["User_NickName"]
     end
 end
-
-
-#insert into Users(User_ID, User_NickName) values ('649463249', 'Cherrry-')
