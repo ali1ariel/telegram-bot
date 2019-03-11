@@ -1,0 +1,5 @@
+source 'https://rubygems.org'
+gem 'telegram/bot'
+gem 'unicode/emoji'
+gem 'scrobbler2' :git => 'https://github.com/ali1ariel/scrobbler2.git' :branch => 'patch-1'
+gem 'mysql2'

@@ -13,7 +13,6 @@ def incluiUser(client, username, userid)
     end
     queryteste = "select * from Users where User_ID = #{userid}"
     result = client.query(queryteste)
-    puts result.size
     if result.size == 1
         queryteste = "UPDATE Users SET User_NickName = '#{username}' WHERE User_ID = #{userid}"
         client.query(queryteste)

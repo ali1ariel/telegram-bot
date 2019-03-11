@@ -6,8 +6,8 @@ require_relative 'sendmessages'
 #the secret tokens for this bot
 require_relative 'tokens'
 
-def lastFMUser(database, id, bot, message)
-  user = retornaUser(database, id)
+def lastFMUser(database, bot, message)
+  user = retornaUser(database, message.from.id)
     if user.empty? 
       MandaMensagem(bot, message, "Ainda não efetuou o cadastro, vem de pv")
       return false
@@ -19,31 +19,38 @@ def errorOcorred()
   return "oi, algo deu errado"
 end
 
+def heyListen(database, message, bot, typeListen)
+  user = lastFMUser(database, bot, message)
+  if user != false
+    info = getTrack(user, typeListen)
+    printMusic(bot, message, info)
+  end
+end
 
 def printArtist (bot, message, info)
-  texto ="<b>#{message.chat.first_name}</b> <i>already listened to</i> <b>#{info['name']} #{info['playcount']}</b>\u{2716} <i> times</i>"
 
   if (info == false)
     MandaMensagem(bot, message, errorOcorred())
     return
   end
+
+  texto ="<b>#{message.from.first_name}</b> <i>already listened to</i> <b>#{info['name']} #{info['playcount']}</b> <i>times</i>"
   printing(bot, message, info, texto)
 end
 
 
 def printAlbum (bot, message, info)
-  texto ="<b>#{message.chat.first_name}</b> <i>already listened to</i> <b>#{info['album']}</b> <i>by</i> <b>#{info['artist']} #{info['playcount']}</b> \u{2716} <i>times</i>"
-
   if (info == false)
     MandaMensagem(bot, message, errorOcorred())
     return
   end
-
+  
+  texto ="<b>#{message.from.first_name}</b> <i>already listened to</i> <b>#{info['album']}</b> <i>by</i> <b>#{info['artist']} #{info['playcount']}</b> <i>times</i>"
   printing(bot, message, info, texto)
 end
 
 def printMusic(bot, message, info)
-  texto ="<b>#{message.chat.first_name}</b> "
+  texto ="<b>#{message.from.first_name}</b> "
 
   if (info == false)
     MandaMensagem(bot, message, errorOcorred())
@@ -67,13 +74,12 @@ end
 
 Telegram::Bot::Client.run(TOKEN) do |bot|
   database = iniciaServidor()
-  #bot.logger.info('funcionando')
-  
   bot.listen do |message|
 
     if (message.text.class != NilClass) 
 
       if message.text.include? '/newuser'
+
         message.text.slice!("/newuser ")
         print message.chat.username
         MandaMensagem(bot, message, incluiUser(database, message.text, message.from.id))
@@ -82,34 +88,23 @@ Telegram::Bot::Client.run(TOKEN) do |bot|
       case message.text
 
         when '/listen', '/listen@MeuLastFMbot'
-          user = lastFMUser(database, message.from.id, bot, message)
-          if user != false
-            info = getTrack(user, 1)
-            printMusic(bot, message, info)
-          end
+          heyListen(database, message, bot, 1)
+
         when '/minilisten', '/minilisten@MeuLastFMbot'
-          user = lastFMUser(database, message.from.id, bot, message)
-          if user != false
-            info = getTrack(user, 2)
-            printMusic(bot, message, info)
-          end
+          heyListen(database, message, bot, 2)
 
         when '/textlisten', '/textlisten@MeuLastFMbot'
-          user = lastFMUser(database, message.from.id, bot, message)
-          if user != false
-            info = getTrack(user, 3)
-            printMusic(bot, message, info)
-          end
-
+          heyListen(database, message, bot, 3
+            )
         when '/artist', '/artist@MeuLastFMbot'
-          user = lastFMUser(database, message.from.id, bot, message)
+          user = lastFMUser(database, bot, message)
           if user != false 
             info = getArtist(user)
             printArtist(bot, message, info)
           end
 
         when '/album', '/album@MeuLastFMbot'
-          user = lastFMUser(database, message.from.id, bot, message)
+          user = lastFMUser(database, bot, message)
           if user != false
             info = getAlbum(user)
             printAlbum(bot, message, info)

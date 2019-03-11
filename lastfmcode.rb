@@ -5,18 +5,19 @@ def datasong(song, texto)
 end
   
 def listening(song)
-  texto ="<i>is listening for the</i><b> #{playcount(song)}</b> \u{2716}<b>time</b> <i>to:</i>"
+  texto ="<i>is listening for the</i><b> #{playcount(song)}</b> <b>time</b> <i>to:</i>"
   datasong(song, texto)
 end
 
 def waslistening(song)
-  texto ="<i>was listening for the</i> <b>#{playcount(song)}</b> \u{2716}<b>time</b> <i>to:</i>"
+  texto ="<i>was listening for the</i> <b>#{playcount(song)}</b> <b>time</b> <i>to:</i>"
   datasong(song, texto)
 end
 
 def playcount(song)
+  song['playcount']= 1 if(song['playcount'] == nil)
   return case song['playcount']
-  when 1
+  when 0, 1
     "1st"
   when 2
     "2nd"
@@ -70,7 +71,6 @@ def getTrack(username, typeListen)
   track = Scrobbler2::Track.new(newInfo['artist'], newInfo['name'], username)
   if(track.info.class != NilClass)  
     newInfo['playcount'] = track.info['userplaycount'].to_i  
-    puts "=> #{newInfo['playcount']} e #{newInfo['playcount'].class}"
     if newInfo['playcount'] == 0
 
        newInfo['playcount'] =+1
@@ -90,6 +90,7 @@ end
 def getArtist(username)
   newInfo = Hash.new
   trackInfo = getTrackInfo(username)
+  return false if (trackInfo == false)
   artist = trackInfo['artist']['#text']
   newInfo['name'] = artist
   artist = Scrobbler2::Artist.new(artist, username)
@@ -107,9 +108,9 @@ end
 def getAlbum(username)
   newInfo = Hash.new
   trackInfo = getTrackInfo(username)
+  return false if (trackInfo == false)
   artist = trackInfo['artist']['#text']
   album = trackInfo['album']['#text']
-  puts album.class
   newInfo['album'] = album
   newInfo['artist'] = artist
   album = Scrobbler2::Album.new(artist, album, username)
