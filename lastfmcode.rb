@@ -1,17 +1,15 @@
 require 'scrobbler2'
 
 def datasong(song, texto)
-  return texto = "#{texto}\n \u{1F3B6} <b>#{song['name']}</b>\n \u{1F465} <i>#{song['artist']}</i>\n \u{1F4BF} <i>#{song['album']}</i>"
+  return "\n <a href=\'#{song['image']['link']}\'>\u{1F3B6}</a> <b>#{song['name']}</b>\n \u{1F465} <i>#{song['artist']}</i>\n \u{1F4BF} <i>#{song['album']}</i>"
 end
   
 def listening(song)
-  texto ="<i>is listening for the</i><b> #{playcount(song)}</b> <b>time</b> <i>to:</i>"
-  datasong(song, texto)
+  texto = "<i>is listening for the</i><b> #{playcount(song)}</b> <b>time</b> <i>to:</i> #{datasong(song, texto)}"
 end
 
 def waslistening(song)
-  texto ="<i>was listening for the</i> <b>#{playcount(song)}</b> <b>time</b> <i>to:</i>"
-  datasong(song, texto)
+  texto = "<i>was listening for the</i> <b>#{playcount(song)}</b> <b>time</b> <i>to:</i> #{datasong(song, texto)}"
 end
 
 def playcount(song)
@@ -60,11 +58,11 @@ end
 
 
 def getTrack(username, typeListen)
+  
+  
   newInfo = Hash.new
   trackInfo = getTrackInfo(username)
-  if trackInfo ==false
-    return false
-  end
+  return "User Error" if trackInfo ==false
   newInfo['isListening'] = trackInfo.include? '@attr'
   newInfo['name'] = trackInfo['name']
   newInfo['artist'] = trackInfo['artist']['#text']
@@ -75,6 +73,7 @@ def getTrack(username, typeListen)
 
        newInfo['playcount'] =+1
     end
+  else newInfo['playcount'] = "i don't know-"
   end
   newInfo['album'] = trackInfo['album']['#text']
   newInfo['image'] = Hash.new
@@ -90,11 +89,12 @@ end
 def getArtist(username)
   newInfo = Hash.new
   trackInfo = getTrackInfo(username)
-  return false if (trackInfo == false)
+  return "User error" if (trackInfo == false)
   artist = trackInfo['artist']['#text']
-  newInfo['name'] = artist
   artist = Scrobbler2::Artist.new(artist, username)
+  return "Artist error tag" if artist.info.class == NilClass
   artist = artist.info
+  newInfo['name'] = artist['name']
   newInfo['playcount'] = artist['stats']['userplaycount'].to_i+1
   newInfo['image'] = Hash.new
   if(!artist['image'][3]['#text'].to_s.empty?)
@@ -110,13 +110,17 @@ def getAlbum(username)
   trackInfo = getTrackInfo(username)
   return false if (trackInfo == false)
   artist = trackInfo['artist']['#text']
+  
   album = trackInfo['album']['#text']
   newInfo['album'] = album
   newInfo['artist'] = artist
+  puts artist, album, username
   album = Scrobbler2::Album.new(artist, album, username)
+
+  print "\n AAA #{album.info.class}"
   album = album.info
-  print "\n"
-  return false if album.class == NilClass
+  print "\n BBB #{album}"
+  return "Has a error with the album or the artist tags" if album.class == NilClass
 
   newInfo['playcount'] = album['userplaycount'].to_i
   newInfo['playcount']+= 1 if newInfo['playcount'] == 0 
